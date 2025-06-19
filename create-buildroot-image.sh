@@ -17,30 +17,33 @@
 
 set -eux
 
+
+if [ -f /.dockerenv ] || grep -qE '/docker/|/docker-' /proc/1/cgroup; then
+    echo "[+] Running inside Docker."
+else
+    echo "[-] This script is intended to be executed inside a Docker container. Read the README.md please,"
+    exit 1
+fi
+
+if [ ! -d "/output" ]; then
+    echo "[-] There is no /output directory. Please mount a directory to /output"
+    exit 1
+fi
+
+
 NOMAKE="${NOMAKE:-}"
 TARGETARCH="${TARGETARCH:-amd64}"
 case "$TARGETARCH" in
 	amd64)
 		DEFCONFIG="pc_x86_64_bios_defconfig";;
-	arm64)
-		DEFCONFIG="aarch64_efi_defconfig";;
-	arm)
-		DEFCONFIG="qemu_arm_vexpress_defconfig";;
-	riscv64)
-		DEFCONFIG="qemu_riscv64_virt_defconfig";;
-	s390x)
-		DEFCONFIG="qemu_s390x_defconfig";;
-	mips64le)
-		DEFCONFIG="qemu_mips64r6el_malta_defconfig";;
-	ppc64le)
-		DEFCONFIG="qemu_ppc64le_pseries_defconfig";;
 	*)
 		echo "unsupported TARGETARCH=${TARGETARCH}"
+		echo "This script only supports amd64"
 		exit 1;;
 esac
 
-git fetch origin
-git checkout 2025.02.1
+# git fetch origin
+# git checkout 2025.02.1
 
 make "${DEFCONFIG}"
 
@@ -254,5 +257,16 @@ chmod u+x rootfs_script.sh post_image_script.sh
 make olddefconfig
 
 if [[ "$NOMAKE" == "" ]]; then
-	make -j64
+	make -j64  || true
 fi
+
+
+# Check if ./output/images/disk.img generated.
+if [[ ! -f ./output/images/disk.img ]]; then
+		echo "Error: ./output/images/disk.img not found"
+		exit 1
+fi
+
+echo "Buildroot image created successfully: ./output/images/disk.img"
+echo "Copying disk image to /output/disk.img"
+cp ./output/images/disk.img /output/disk.img || true
