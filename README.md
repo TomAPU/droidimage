@@ -1,4 +1,5 @@
 # Android Disk Image for Kernel Exploit Development with Binder Support
+[🌐 English Version](README.md) | [🌐 中文版本](README_CN.md)
 
 ## Purpose
 
