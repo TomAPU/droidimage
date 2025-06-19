@@ -64,6 +64,53 @@ CONFIG_ANDROID_DEBUG_SYMBOLS=y
 CONFIG_ANDROID_VENDOR_HOOKS=y
 ```
 
+## Running the Image with QEMU + Kernel
+
+Once you have built or downloaded the `disk.img`, you can boot it using QEMU and your own kernel image (`bzImage`). The example below includes SSH, GDB, and monitor access — **you may customize the port numbers as needed**.
+
+```bash
+# Replace paths and ports with your own values
+qemu-system-x86_64 \
+ -m 2048 \
+ -gdb tcp::[GDB_PORT] \
+ -monitor tcp::[MONITOR_PORT],server,nowait \
+ -smp 4 \
+ -display none -serial stdio -no-reboot \
+ -device virtio-rng-pci \
+ -cpu host,migratable=on \
+ -kernel /path/to/bzImage \
+ -device virtio-scsi-pci,id=scsi \
+ -device scsi-hd,bus=scsi.0,drive=d0 \
+ -drive file=/path/to/disk.img,if=none,id=d0 \
+ -append "nokaslr earlyprintk=serial root=/dev/sda1 console=ttyS0" \
+ -net user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:[SSH_PORT]-:22 \
+ -net nic,model=e1000 \
+ -enable-kvm -nographic -snapshot
+```
+
+### Replace:
+
+* `/path/to/bzImage` — your Linux kernel image
+* `/path/to/disk.img` — the generated Android disk image
+* `[GDB_PORT]` — port for optional GDB debugging
+* `[MONITOR_PORT]` — port for QEMU monitor
+* `[SSH_PORT]` — local forwarded port for SSH access
+
+Note that after booting, you can not directly interact with the VM, you *have* to use SSH.
+
+
+## Accessing the VM via SSH
+
+After QEMU starts and the VM boots up, you can SSH into it using:
+
+```bash
+ssh -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -o PubkeyAuthentication=no \
+    root@127.0.0.1 -p [SSH_PORT]
+```
+
+No password or key setup is needed — you’ll get direct root access.
 
 ## How It Works
 

@@ -64,6 +64,55 @@ CONFIG_ANDROID_DEBUG_SYMBOLS=y
 CONFIG_ANDROID_VENDOR_HOOKS=y
 ```
 
+## 使用 QEMU 和内核启动镜像
+
+在构建或下载好 `disk.img` 之后，您可以使用 QEMU 和自行准备的内核镜像（`bzImage`）来启动它。以下示例包括对 SSH、GDB 和 QEMU monitor 的访问 — **端口号可根据需要自定义**。
+
+```bash
+# 请将路径和端口替换为您自己的值
+qemu-system-x86_64 \
+ -m 2048 \
+ -gdb tcp::[GDB_PORT] \
+ -monitor tcp::[MONITOR_PORT],server,nowait \
+ -smp 4 \
+ -display none -serial stdio -no-reboot \
+ -device virtio-rng-pci \
+ -cpu host,migratable=on \
+ -kernel /path/to/bzImage \
+ -device virtio-scsi-pci,id=scsi \
+ -device scsi-hd,bus=scsi.0,drive=d0 \
+ -drive file=/path/to/disk.img,if=none,id=d0 \
+ -append "nokaslr earlyprintk=serial root=/dev/sda1 console=ttyS0" \
+ -net user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:[SSH_PORT]-:22 \
+ -net nic,model=e1000 \
+ -enable-kvm -nographic -snapshot
+```
+
+### 请替换以下内容：
+
+* `/path/to/bzImage` — 您的 Linux 内核镜像路径
+* `/path/to/disk.img` — 生成的 Android 磁盘镜像路径
+* `[GDB_PORT]` — 可选的 GDB 调试端口
+* `[MONITOR_PORT]` — QEMU monitor 的端口
+* `[SSH_PORT]` — SSH 本地转发端口
+
+注意：启动后您无法直接与虚拟机交互，**必须通过 SSH 连接使用**。
+
+---
+
+## 通过 SSH 访问虚拟机
+
+在 QEMU 启动并且虚拟机启动完成后，您可以通过以下方式 SSH 登录：
+
+```bash
+ssh -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -o PubkeyAuthentication=no \
+    root@127.0.0.1 -p [SSH_PORT]
+```
+
+不需要密码或密钥设置 — 您将直接以 root 身份登录。
+
 ## 工作原理
 
 本项目基于 **Syzkaller 的 buildroot 脚本**，在其基础上增加了运行 `hwservicemanager` 和支持 Binder 测试所需的最小 AOSP 组件集。
