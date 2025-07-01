@@ -96,7 +96,7 @@ qemu-system-x86_64 \
 * `[MONITOR_PORT]` — QEMU monitor 的端口
 * `[SSH_PORT]` — SSH 本地转发端口
 
-注意：启动后您无法直接与虚拟机交互，**必须通过 SSH 连接使用**。
+注意：启动后您无法直接与虚拟机交互，~~**必须通过 SSH 连接使用**~~。实际上只要编译内核的时候开了`CONFIG_SERIAL_8250_RUNTIME_UARTS=4`就可以。
 
 ---
 
