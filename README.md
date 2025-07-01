@@ -96,7 +96,7 @@ qemu-system-x86_64 \
 * `[MONITOR_PORT]` — port for QEMU monitor
 * `[SSH_PORT]` — local forwarded port for SSH access
 
-Note that after booting, you can not directly interact with the VM, you *have* to use SSH.
+Note that after booting, you can not directly interact with the VM, ~~you *have* to use SSH~~. If you enabled `CONFIG_SERIAL_8250_RUNTIME_UARTS=4` in the kernel config, actually you can still interact with the kernel through the terminal directly,
 
 
 ## Accessing the VM via SSH
