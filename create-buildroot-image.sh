@@ -36,9 +36,11 @@ TARGETARCH="${TARGETARCH:-amd64}"
 case "$TARGETARCH" in
 	amd64)
 		DEFCONFIG="pc_x86_64_bios_defconfig";;
+	arm64)
+		DEFCONFIG="aarch64_efi_defconfig";;
 	*)
 		echo "unsupported TARGETARCH=${TARGETARCH}"
-		echo "This script only supports amd64"
+		echo "This script only supports amd64 or arm64 architectures."
 		exit 1;;
 esac
 
@@ -101,7 +103,6 @@ BR2_PACKAGE_ZD1211_FIRMWARE=y
 BR2_PACKAGE_LIBSELINUX=y
 BR2_PACKAGE_REFPOLICY=y
 BR2_PACKAGE_REFPOLICY_POLICY_STATE_PERMISSIVE=y
-BR2_ROOTFS_OVERLAY="../light_overlay"
 # BR2_PACKAGE_REFPOLICY_POLICY_STATE_ENFORCING is not set
 # BR2_PACKAGE_REFPOLICY_POLICY_STATE_DISABLED is not set
 EOF
@@ -116,6 +117,7 @@ BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="board/qemu/x86_64/linux.config"
 # This is used to create some device links in devfs (see udev rules below),
 # but this is too slow for emulated architectures.
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
+BR2_ROOTFS_OVERLAY="../light_overlay"
 EOF
 ;;
         arm64)
@@ -128,6 +130,7 @@ BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_10=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="5.10.235"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="board/aarch64-efi/post-image.sh ./post_image_script.sh support/scripts/genimage.sh"
 BR2_ROOTFS_POST_SCRIPT_ARGS="-c ./custom-genimage-efi.cfg"
+BR2_ROOTFS_OVERLAY="../light_overlay_arm64"
 EOF
 ;;
 	arm)

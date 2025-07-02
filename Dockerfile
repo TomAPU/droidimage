@@ -11,6 +11,7 @@ WORKDIR /workspace
 
 # Copy project-specific files into the container
 COPY light_overlay/ ./light_overlay/
+COPY light_overlay_arm64/ ./light_overlay_arm64/
 COPY create-buildroot-image.sh ./
 
 # Install dependencies required for Buildroot builds and clone the repository

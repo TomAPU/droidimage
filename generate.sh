@@ -9,6 +9,22 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+# Validate TARGETARCH if set
+if [ -n "$TARGETARCH" ]; then
+    if [ "$TARGETARCH" != "amd64" ] && [ "$TARGETARCH" != "arm64" ]; then
+        echo "Error: TARGETARCH must be 'amd64', 'arm64' or unset."
+        exit 1
+    fi
+    echo "TARGETARCH is set to: $TARGETARCH"
+else
+    echo "TARGETARCH is not set, proceeding without it."
+fi
+
+ENV_VARS=""
+if [ -n "$TARGETARCH" ]; then
+    ENV_VARS="-e TARGETARCH=$TARGETARCH"
+fi
+
 # Resolve the output directory and check existence
 OUTPUT_DIR=$(realpath "$1")
 
@@ -25,4 +41,4 @@ echo "Mounting as /output inside the container."
 docker build -t buildroot-builder .
 
 # Run the container with the output directory mounted
-docker run -it -v "$OUTPUT_DIR:/output" buildroot-builder
+docker run -it -v "$OUTPUT_DIR:/output" $ENV_VARS buildroot-builder
