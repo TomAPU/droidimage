@@ -61,7 +61,7 @@ BR2_PACKAGE_OPENSSH=y
 # This slows down boot.
 # BR2_PACKAGE_URANDOM_SCRIPTS is not set
 
-BR2_TARGET_ROOTFS_EXT2_SIZE="2G"
+BR2_TARGET_ROOTFS_EXT2_SIZE="1793M"
 # Slightly more interesting and realistic options.
 BR2_TARGET_ROOTFS_EXT2_MKFS_OPTIONS="-O 64bit,ext_attr,encrypt,extents,huge_file,flex_bg,dir_nlink,sparse_super,resize_inode,has_journal"
 
@@ -105,6 +105,8 @@ BR2_PACKAGE_REFPOLICY=y
 BR2_PACKAGE_REFPOLICY_POLICY_STATE_PERMISSIVE=y
 # BR2_PACKAGE_REFPOLICY_POLICY_STATE_ENFORCING is not set
 # BR2_PACKAGE_REFPOLICY_POLICY_STATE_DISABLED is not set
+BR2_TARGET_ROOTFS_CPIO=y
+BR2_TARGET_ROOTFS_CPIO_GZIP=y
 EOF
 
 # Per-arch config fragments.
@@ -273,3 +275,12 @@ fi
 echo "Buildroot image created successfully: ./output/images/disk.img"
 echo "Copying disk image to /output/disk.img"
 cp ./output/images/disk.img /output/disk.img || true
+
+if [[ ! -f ./output/images/rootfs.cpio.gz ]]; then
+		echo "Error: ./output/images/rootfs.cpio.gz not found"
+		exit 1
+fi
+
+echo "Initramfs created successfully: ./output/images/rootfs.cpio.gz"
+echo "Copying initramfs to /output/initramfs.cpio.gz"
+cp ./output/images/rootfs.cpio.gz /output/initramfs.cpio.gz || true
